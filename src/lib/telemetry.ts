@@ -131,7 +131,7 @@ export function useTelemetry(): Telemetry {
         const pressureKpa = prev.pressureKpa + (leaking ? 0.25 : -0.05) + (Math.random() - 0.5) * 0.1;
         const temperatureC = prev.temperatureC + (Math.random() - 0.5) * 0.2;
 
-        const last = prev.trend[prev.trend.length - 1];
+        const last = prev.trend[prev.trend.length - 1] ?? { t: 0, value: 62, anomaly: false };
         const nextValue = leaking
           ? Math.min(96, last.value + 3 + Math.random() * 3)
           : Math.max(48, 62 + Math.sin(last.t / 4) * 6 + (Math.random() - 0.5) * 3);
@@ -142,29 +142,25 @@ export function useTelemetry(): Telemetry {
 
         let alerts = prev.alerts;
         if (leaking && !prev.leakActive) {
-          alerts = [
-            {
-              id: ++alertId,
-              time: timeLabel(),
-              message: "Fuel drop anomaly detected",
-              severity: "high",
-              detail: `Unexplained ${(Math.abs(flowDelta) * 1.2).toFixed(1)} L drop below idle baseline.`,
-              confidence: 90 + Math.round(Math.random() * 9),
-            },
-            ...prev.alerts,
-          ].slice(0, 8);
+          const alert: AlertItem = {
+            id: ++alertId,
+            time: timeLabel(),
+            message: "Fuel drop anomaly detected",
+            severity: "high",
+            detail: `Unexplained ${(Math.abs(flowDelta) * 1.2).toFixed(1)} L drop below idle baseline.`,
+            confidence: 90 + Math.round(Math.random() * 9),
+          };
+          alerts = [alert, ...prev.alerts].slice(0, 8);
         } else if (!leaking && prev.leakActive) {
-          alerts = [
-            {
-              id: ++alertId,
-              time: timeLabel(),
-              message: "Flow returned to baseline",
-              severity: "info",
-              detail: "Drain rate normalized, monitoring continues.",
-              confidence: 100,
-            },
-            ...prev.alerts,
-          ].slice(0, 8);
+          const alert: AlertItem = {
+            id: ++alertId,
+            time: timeLabel(),
+            message: "Flow returned to baseline",
+            severity: "info",
+            detail: "Drain rate normalized, monitoring continues.",
+            confidence: 100,
+          };
+          alerts = [alert, ...prev.alerts].slice(0, 8);
         }
 
         return {
