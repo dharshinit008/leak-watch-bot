@@ -31,7 +31,7 @@ function TrendChart({ trend }: { trend: TrendPoint[] }) {
   const points = trend.map((p, i) => `${x(i)},${y(p.value)}`).join(" ");
   let anomalyIdx = -1;
   for (let i = trend.length - 1; i >= 0; i--) {
-    if (trend[i].anomaly) {
+    if (trend[i]?.anomaly) {
       anomalyIdx = i;
       break;
     }
