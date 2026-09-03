@@ -29,8 +29,14 @@ function TrendChart({ trend }: { trend: TrendPoint[] }) {
   const x = (i: number) => (i / (trend.length - 1)) * w;
   const y = (v: number) => h - ((v - min) / (max - min)) * h;
   const points = trend.map((p, i) => `${x(i)},${y(p.value)}`).join(" ");
-  const anomaly = trend.findLast((p) => p.anomaly);
-  const anomalyIdx = anomaly ? trend.lastIndexOf(anomaly) : -1;
+  let anomalyIdx = -1;
+  for (let i = trend.length - 1; i >= 0; i--) {
+    if (trend[i].anomaly) {
+      anomalyIdx = i;
+      break;
+    }
+  }
+  const anomaly = anomalyIdx >= 0 ? trend[anomalyIdx] : null;
 
   return (
     <svg className="h-full w-full" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
